@@ -10,6 +10,8 @@ BINARIES := $(patsubst %.cpp, $(BUILDDIR)/%, $(SOURCES))
 
 all: $(BINARIES) test
 
+LDFLAGS_pipelines = -lpthread
+
 .PHONY+=test
 test:
 	@echo "   [ TEST ]"
@@ -23,7 +25,7 @@ $(DEPS): $(BUILDDIR)/%.dep: %.cpp $(BUILDDIR)/.tag
 
 $(BINARIES): ./$(BUILDDIR)/%: %.cpp $(DEPS) $(BUILDDIR)/.tag
 	@echo "   [ CC ]   $(filter %.cpp,$^)"
-	@$(CXX) $(CXXFLAGS) $(INCLUDES) -o $@ $(filter %.cpp,$^)
+	@$(CXX) $(CXXFLAGS) $(INCLUDES) $(if $(LDFLAGS_$(notdir $@)),$(LDFLAGS_$(notdir $@)),) -o $@ $(filter %.cpp,$^)
 
 $(BUILDDIR)/.tag:
 	@echo "   [ MD ]   $(BUILDDIR)"
@@ -33,3 +35,4 @@ $(BUILDDIR)/.tag:
 clean:
 	@echo "   [ RM ]   $(BUILDDIR)"
 	@rm -rf build	
+

@@ -1,6 +1,6 @@
 #include <boost/monads/monad.hpp>
 #include <boost/monads/controlmonad.hpp>
-
+#include <boost/monads/algorithm.hpp>
 #include <memory>
 #include <iostream>
 #include <cassert>

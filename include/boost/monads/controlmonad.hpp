@@ -24,16 +24,6 @@ auto run_cont(Cont&& cont, Callable&& c)
     return call(std::forward<Cont>(cont), std::forward<Callable>(c));
 }
 
-struct identity_
-{
-    template <typename T>
-    T&& operator() (T&& x) const
-    {
-        return x;
-    }
-};
-identity_ identity() { return identity_{}; }
-
 namespace detail {
 // hack around the fact that we cannot return lambdas.
 
@@ -215,4 +205,3 @@ struct erased_cps {
 }} // namespace boost::monads
 
 #endif // BOOST_MONADS_CONTROLMONAD_HPP
- 

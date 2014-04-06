@@ -52,14 +52,12 @@ namespace boost { namespace monads {
 
 template <typename T> struct monad_type {};
 
-    namespace extend {
-    }
-
 namespace detail {
 
-  struct not_a_real_type{};
-  void do_mbind(not_a_real_type);
-  void do_mreturn(not_a_real_type);
+// support for basic types can be added in this namespace
+struct not_a_real_type{};
+void do_mbind(not_a_real_type);
+void do_mreturn(not_a_real_type);
 
 template<int I> struct choice : choice<I-1> {};
 template<> struct choice<0> {};
@@ -69,27 +67,25 @@ using first_choice  = choice<2>;
 using second_choice = choice<1>;
 using third_choice  = choice<0>;
 
-  using namespace boost::monads::extend;
-
 template <typename M, typename F>
-auto mbind_(first_choice, M const& monad, F&& fun)
-    -> decltype(monad.mbind(std::forward<F>(fun)))
+auto mbind_(first_choice, M&& monad, F&& fun)
+    -> decltype(std::forward<M>(monad).mbind(std::forward<F>(fun)))
 {
-    return monad.mbind(std::forward<F>(fun));
+    return std::forward<M>(monad).mbind(std::forward<F>(fun));
 }
 
 template <typename M, typename F>
-auto mbind_(second_choice, M const& monad, F&& fun)
-    -> decltype(boost_mbind(monad, std::forward<F>(fun)))
+auto mbind_(second_choice, M&& monad, F&& fun)
+    -> decltype(boost_mbind(std::forward<M>(monad), std::forward<F>(fun)))
 {
-    return boost_mbind(monad, std::forward<F>(fun));
+    return boost_mbind(std::forward<M>(monad), std::forward<F>(fun));
 }
 
 template <typename M, typename F>
-auto mbind_(third_choice, M const& monad, F&& fun)
-    -> decltype(detail::do_mbind(monad, std::forward<F>(fun)))
+auto mbind_(third_choice, M&& monad, F&& fun)
+  -> decltype(detail::do_mbind(std::forward<M>(monad), std::forward<F>(fun)))
 {
-    return detail::do_mbind(monad, std::forward<F>(fun));
+    return detail::do_mbind(std::forward<M>(monad), std::forward<F>(fun));
 }
 
 template <typename M, typename T>
@@ -116,10 +112,10 @@ auto mreturn_(third_choice, monad_type<M>, T&& elem)
 
 
 template <typename M, typename F>
-auto mbind(M const& monad, F&& fun)
-    -> decltype(detail::mbind_(detail::make_choice{}, monad, std::forward<F>(fun)))
+auto mbind(M&& monad, F&& fun)
+    -> decltype(detail::mbind_(detail::make_choice{}, std::forward<M>(monad), std::forward<F>(fun)))
 {
-    return detail::mbind_(detail::make_choice{}, monad, std::forward<F>(fun));
+    return detail::mbind_(detail::make_choice{}, std::forward<M>(monad), std::forward<F>(fun));
 }
 
 template <typename M, typename T>
@@ -155,4 +151,3 @@ monad_piper<M> monad_pipe(M&& m)
 }} // namespace boost::monads
 
 #endif // BOOST_MONADS_MONAD_HPP
- 
